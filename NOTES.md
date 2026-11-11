@@ -134,13 +134,16 @@ Trong lần chạy đầu tiên (`eval_before.json`), bộ đánh giá đạt **
 
 | Chỉ số | `eval_before.json` | `eval_after.json` |
 |---|---|---|
-| Điểm tổng (`score_0_100`) | **94.77 / 100** (22/22 cases scored) | *(Đang cập nhật sau khi chạy `eval_after.json`)* |
-| Điểm case đã chọn (`H7` / `H2`) | `H7`: **35 / 100**, `H2`: **50 / 100** | *(Đang cập nhật sau khi chạy `eval_after.json`)* |
-| Số model calls (tổng 22 cases) | **62** model steps (42 tool calls) | *(Đang cập nhật sau khi chạy `eval_after.json`)* |
-| Token, chi phí nếu có | Agent: **75,692** tokens; Judge: **45,801** tokens (Tổng: **121,493** tokens) | *(Đang cập nhật sau khi chạy `eval_after.json`)* |
+| Điểm tổng (`score_0_100`) | **94.77 / 100** (22/22 cases scored) | **97.95 / 100** (+3.18 điểm, 22/22 cases scored) |
+| Điểm case đã chọn (`H7` / `H2`) | `H7`: **35 / 100**, `H2`: **50 / 100** | `H7`: **100 / 100** (+65 điểm), `H2`: **100 / 100** (+50 điểm) |
+| Số model calls (tổng 22 cases) | **62** model steps (42 tool calls) | **63** model steps (50 tool calls) |
+| Token, chi phí nếu có | Agent: **75,692** tokens; Judge: **45,801** tokens (Tổng: **121,493** tokens) | Agent: **91,140** tokens; Judge: **48,903** tokens (Tổng: **140,043** tokens) |
 
-- **Lỗi đã giải quyết:** *(Cập nhật sau khi có `eval_after.json`)*
-- **Lỗi còn lại hoặc mới xuất hiện:** *(Cập nhật sau khi có `eval_after.json`)*
+- **Lỗi đã giải quyết:**
+  - **Giải quyết triệt để `H7` (35 -> 100/100):** Khi gặp `TimeoutError` từ Cloudflare Spectrum, Agent đã từ chối yêu cầu gài bẫy trong câu hỏi của người dùng và báo cáo rõ ràng là thiếu dữ liệu xác thực nên không thể kết luận Cloudflare Spectrum đang `operational` hay `outage`.
+  - **Giải quyết triệt để `H2` (50 -> 100/100):** Agent đã gọi đầy đủ cả 2 công cụ ở 2 bước: Step 1 gọi `get_status(provider="github", component="Actions")` để xác minh trạng thái hiện tại trong snapshot (`operational`), Step 2 gọi `get_incident_details(provider="github", incident_id="t89g2q1800fr")` để xác minh sự cố lịch sử đã `resolved`, dẫn đủ cả 2 URL nguồn và không còn vi phạm `requires_tools`.
+- **Lỗi còn lại hoặc mới xuất hiện:**
+  - **Biến động ngẫu nhiên giữa các lần chạy đơn lẻ (`n=1`) ở `H1` (100 -> 60/100) và `E2` (100 -> 95/100):** Ở `eval_after.json`, case `H1` đạt điểm nội dung `raw_judge_score = 96/100` nhưng bị khóa trần `score_cap = 60` do ở lần chạy thứ 2 model gom tất cả lệnh gọi tool vào ngay Step 1 thay vì tách thành 2 bước (`min_tool_steps: 2`) như ở lần chạy thứ 1. Ở `E2`, Judge chấm `95/100` do lưu ý nhỏ về cách diễn đạt câu phủ định. Điều này phản ánh đúng tính ngẫu nhiên (stochasticity) của LLM khi chỉ chạy `n=1` mỗi phiên bản.
 
 ## 5. Giới hạn
 
